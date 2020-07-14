@@ -1,0 +1,13 @@
+aubio==0.4.9
+ffmpeg-python==0.2.0
+ffprobe-python==1.0.3
+flake8==3.8.3
+pycairo==1.19.1
+scipy==1.4.1
+mypy-extensions==0.4.3
+numpy==1.18.4
+matplotlib==3.2.1
+google-api-core==1.21.0
+google-auth==1.18.0
+google-cloud-texttospeech==2.1.0
+googleapis-common-protos==1.52.0
