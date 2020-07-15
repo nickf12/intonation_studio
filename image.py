@@ -298,7 +298,7 @@ class ImageMaker:
                 y1 = self.PADDING + \
                     self.to_image_dim(y, 'path_y') + self.rects()['path'][1]
                 ctx.arc(x1, y1, 15, 0, 2 * math.pi)
-                ctx.set_source_rgb(
+                ctx.set_source_rgba(
                     *ColorTools.to_rgba_source(ColorTools.COLOR_10)
                 )
                 ctx.fill()
