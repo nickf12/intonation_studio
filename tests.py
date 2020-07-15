@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 
 from image import ImageMaker
-from utils import path_in_medialib, augmented_dendrogram
+from utils import path_in_medialib
 from audio import GoogleSpeaker, AudioAnalyst
 from video import VideoMaker
 
@@ -34,7 +34,7 @@ class TestAudioAnalyst(unittest.TestCase):
         analyst1 = AudioAnalyst(filepath, TEST_SENTENCE)
         analyst1.analyse()
         clusters = analyst1.cluster()
-        augmented_dendrogram(clusters.astype(float))
+        dendrogram(clusters.astype(float))
         plt.savefig(path_in_medialib('test_dendogram.svg'), format='svg')
 
     def test_analysis(self):

@@ -151,7 +151,7 @@ class ImageMaker:
                     self.rects()['path'][3] + 2 * self.PADDING
                 )
                 ctx.set_source_rgba(
-                    *ColorTools.to_rgba_source(ColorTools.TRASPARENT_2)
+                    *ColorTools.to_rgba_source(ColorTools.TRANSPARENT_2)
                 )
                 ctx.fill()
         return surface
