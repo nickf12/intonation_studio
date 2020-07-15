@@ -1,5 +1,13 @@
 import os
 import math
+from scipy.cluster.hierarchy import dendrogram
+import matplotlib.pyplot as plt
+
+
+def augmented_dendrogram(*args, **kwargs):
+    ddata = dendrogram(*args, **kwargs)
+
+    
 
 
 def path_in_medialib(filename,  medialib='samples', overwrite=False):

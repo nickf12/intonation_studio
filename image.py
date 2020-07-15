@@ -18,8 +18,7 @@ class ImageMaker:
     PADDING = 10
     BENCHMARKS = 4
     DRAW_GRID = False
-    draw_histogram = False
-    pattern = 'frame_%d.png'
+    PATTERN = 'frame_%d.png'
 
     def __init__(self, data, maker_id=None):
         # Directory Setup
@@ -35,9 +34,8 @@ class ImageMaker:
 
     def rects(self):
         return {
-            'path': (60, 320, 1160, 340),
-            'text': (60, 80, 640, 360),
-            'histogram': (640, 120, 500, 360),
+            'text': (60, 40, 1120, 160),
+            'path': (60, 200, 1160, 500),
         }
 
     @classmethod
@@ -71,7 +69,7 @@ class ImageMaker:
 
     def to_image_dim(self, x, dim):
         """
-        Map to an space dimension
+        Map to a space dimension
         """
         scaled_x = None
         if dim == 'path_x':
@@ -179,30 +177,9 @@ class ImageMaker:
                 ctx.fill()
         return surface
 
-    def cairo_draw_histogram(self):
-        surface = cairo.ImageSurface(
-            cairo.FORMAT_ARGB32,
-            self.rects()['histogram'][2] + 2 * self.PADDING,
-            self.rects()['histogram'][3] + 2 * self.PADDING
-        )
-        ctx = cairo.Context(surface)
-        ctx.set_source_rgba(*ColorTools.to_rgba_source("#FF0000FF"))
-        ctx.move_to(0, 10)
-        ctx.line_to(10, 10)
-        ctx.stroke()
-        ctx.set_source_rgba(*ColorTools.to_rgba_source("#00FF00FF"))
-        ctx.move_to(10, 10)
-        ctx.line_to(60, 60)
-        ctx.stroke()
-        ctx.set_source_rgba(*ColorTools.to_rgba_source("#0000FFFF"))
-        ctx.move_to(60, 60)
-        ctx.line_to(100, 100)
-        ctx.stroke()
-        return surface
-
-    def cairo_draw_benchmarks(self):
+    def cairo_draw_benchmarks(self, leaders=5):
         """
-        Mark the  most used notes
+        Mark the  most used notes. Very confusing but interesting
         """
         surface = cairo.ImageSurface(
             cairo.FORMAT_ARGB32,
@@ -222,7 +199,7 @@ class ImageMaker:
                 ctx.move_to(0, y + self.PADDING)
                 ctx.line_to(self.rects()['path'][2], y + self.PADDING)
                 c = c + 1
-                if c > 5:
+                if c > leaders:
                     break
         ctx.set_source_rgba(
             *ColorTools.to_rgba_source(ColorTools.COLOR_4)
@@ -300,13 +277,6 @@ class ImageMaker:
             self.rects()['text'][0],
             self.rects()['text'][1]
         )
-        if self.draw_histogram:
-            self.cairo_set_source(
-                ctx,
-                self.cairo_draw_histogram(),
-                self.rects()['histogram'][0],
-                self.rects()['histogram'][1]
-            )
 
     def make_images(self):
         self.images = []
@@ -327,8 +297,10 @@ class ImageMaker:
                     self.rects()['path'][0]
                 y1 = self.PADDING + \
                     self.to_image_dim(y, 'path_y') + self.rects()['path'][1]
-                ctx.arc(x1, y1, 20, 0, 2 * math.pi)
-                ctx.set_source_rgb(0.9, 0.9, 0.)  # Solid color
+                ctx.arc(x1, y1, 15, 0, 2 * math.pi)
+                ctx.set_source_rgb(
+                    *ColorTools.to_rgba_source(ColorTools.COLOR_10)
+                )
                 ctx.fill()
             self.images.append(surface_join)
         return self.images
@@ -338,7 +310,7 @@ class ImageMaker:
             cairo.FORMAT_ARGB32,
             self.rects()['text'][2], self.rects()['text'][3])
         ctx = cairo.Context(surface_text)
-        ctx.set_source_rgba(*ColorTools.to_rgba_source(ColorTools.COLOR_10))
+        ctx.set_source_rgba(*ColorTools.to_rgba_source(ColorTools.COLOR_8))
         ctx.set_font_size(120)
         ctx.select_font_face(
             "Roboto",
@@ -358,6 +330,6 @@ class ImageMaker:
         if not self.images:
             self.make_images()
         for x, image in enumerate(self.images):
-            imagepath = self.target_path(self.pattern % x)
+            imagepath = self.target_path(self.PATTERN % x)
             image.write_to_png(imagepath)
-        return self.target_path(self.pattern)
+        return self.target_path(self.PATTERN)

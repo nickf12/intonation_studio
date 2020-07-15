@@ -5,21 +5,21 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 
 from image import ImageMaker
-from utils import path_in_medialib
+from utils import path_in_medialib, augmented_dendrogram
 from audio import GoogleSpeaker, AudioAnalyst
 from video import VideoMaker
 
 TEST_SENTENCE = 'Intonation Studio'
 JSON_FILE = 'test1.json'
 VIDEO_FILE = 'test1.mp4'
-WAV_FILES = ['test1.wav']
+WAV_FILE = 'test1'
 
 
 class TestGoogleSpeaker(unittest.TestCase):
 
     def test_speak_correct(self):
         speaker = GoogleSpeaker()
-        filepath = speaker.speak(TEST_SENTENCE)
+        filepath = speaker.speak(TEST_SENTENCE, filename=WAV_FILE)
         assert(os.path.exists(filepath))
 
 
@@ -30,11 +30,11 @@ class TestAudioAnalyst(unittest.TestCase):
         Hierachical clustering analysis
         """
         plt.clf()
-        filepath = path_in_medialib(WAV_FILES[0])
-        analyst1 = AudioAnalyst(filepath, 'Processing 25 / s')
+        filepath = path_in_medialib(f'{WAV_FILE}.wav')
+        analyst1 = AudioAnalyst(filepath, TEST_SENTENCE)
         analyst1.analyse()
         clusters = analyst1.cluster()
-        dendrogram(clusters.astype(float))
+        augmented_dendrogram(clusters.astype(float))
         plt.savefig(path_in_medialib('test_dendogram.svg'), format='svg')
 
     def test_analysis(self):
@@ -42,14 +42,14 @@ class TestAudioAnalyst(unittest.TestCase):
         Test parametrization
         """
         plt.clf()
-        filepath = path_in_medialib(WAV_FILES[0])
+        filepath = path_in_medialib(f'{WAV_FILE}.wav')
         # not subsampled 86 sample per second
         analyst1 = AudioAnalyst(
             filepath, 'Processing 86 / s',
             samplerate=44100
         )
         # subsampled 25 samples per second
-        analyst2 = AudioAnalyst(filepath, 'Processing 25 / s')
+        analyst2 = AudioAnalyst(filepath, TEST_SENTENCE)
         # 15 seconds per second
         analyst3 = AudioAnalyst(
             filepath, 'Processing 15 / s',
@@ -81,8 +81,8 @@ class TestAudioAnalyst(unittest.TestCase):
 class TestImageMaker(unittest.TestCase):
 
     def setUp(self):
-        filepath = path_in_medialib(WAV_FILES[0])
-        self.analysis = AudioAnalyst(filepath, 'Processing 25 / s').analyse()
+        filepath = path_in_medialib(f'{WAV_FILE}.wav')
+        self.analysis = AudioAnalyst(filepath, TEST_SENTENCE).analyse()
 
     def test_make_images(self):
         generator = ImageMaker(self.analysis)
