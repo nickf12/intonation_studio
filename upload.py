@@ -2,8 +2,6 @@
 Example file from youtube sample code.
 Port to Python3
 Add a singleton connection: YoutubeService
-Add a option class that allows the script to be call also a function
-while working as a command line script
 """
 import argparse
 import http.client
