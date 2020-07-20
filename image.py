@@ -12,7 +12,7 @@ from utils import path_in_medialib, NoteTools, ColorTools
 
 class ImageMaker:
     """
-    Create the video frames
+    Make the images for the video and save them in the target folder
     """
     WIDTH, HEIGHT = 1280, 720
     PADDING = 10
@@ -21,27 +21,21 @@ class ImageMaker:
     PATTERN = 'frame_%d.png'
 
     def __init__(self, data, maker_id=None):
-        # Directory Setup
         self.data = data
         self.samples = np.array(self.data['samples'])
         self.id = maker_id if maker_id else random.randint(4, 10)
 
     def __getattr__(self, name):
-        """ Shortcut. The data dictionary is accesible through the object
+        """ Shortcut.
+            The data dictionary is accesible through the object
         """
         if name in self.data:
             return self.data[name]
 
-    def rects(self):
-        return {
-            'text': (60, 40, 1120, 160),
-            'path': (60, 200, 1160, 500),
-        }
-
     @classmethod
     def from_filepath(cls, filepath):
         """
-        Create an instance from a file
+        Factory method. Create an instance from a analysis file
         """
         out = None
         with open(filepath) as json_file:
@@ -49,10 +43,25 @@ class ImageMaker:
             out = cls(analysis)
         return out
 
+    def rects(self):
+        """
+        Measurements of elements within the image
+        """
+        return {
+            'text': (60, 40, 1120, 160),
+            'path': (60, 200, 1160, 500),
+        }
+
     def target_path(self, filename):
+        """
+        Create a path within the targetdir
+        """
         return os.path.join(self.targetdir, filename)
 
     def init_targetdir(self, custom_targetdir=None):
+        """
+        Init the target folder.
+        """
         if custom_targetdir:
             self.targetdir = custom_targetdir
             self.is_custom_targetdir = True
@@ -69,7 +78,7 @@ class ImageMaker:
 
     def to_image_dim(self, x, dim):
         """
-        Map to a space dimension
+        Map to a image dimension
         """
         scaled_x = None
         if dim == 'path_x':
@@ -179,7 +188,8 @@ class ImageMaker:
 
     def cairo_draw_benchmarks(self, leaders=5):
         """
-        Mark the  most used notes. Very confusing but interesting
+            Outline the most used notes from the histogram
+            Very confusing but interesting
         """
         surface = cairo.ImageSurface(
             cairo.FORMAT_ARGB32,
@@ -230,10 +240,16 @@ class ImageMaker:
         return surface
 
     def cairo_set_source(self, ctx, surface, x, y):
+        """
+        Add a surface to a context.
+        """
         ctx.set_source_surface(surface, x, y)
         ctx.paint()
 
-    def cairo_add_background(self, ctx):
+    def cairo_draw_background(self, ctx):
+        """
+        Draw the background
+        """
         self.cairo_set_source(
             ctx,
             self.cairo_draw_canvas(),
@@ -279,6 +295,9 @@ class ImageMaker:
         )
 
     def make_images(self):
+        """
+        Create the images to be used in the video
+        """
         self.images = []
         for x, y in enumerate(self.samples):
             surface_join = cairo.ImageSurface(
@@ -289,7 +308,7 @@ class ImageMaker:
             ctx.set_source_rgba(*ColorTools.to_rgba_source(ColorTools.COLOR_0))
             ctx.fill()
             # Add the background
-            self.cairo_add_background(ctx)
+            self.cairo_draw_background(ctx)
             # Add the foreground
             if y != self.no_value and y != 0.0:
                 x1 = self.PADDING + \
@@ -324,7 +343,7 @@ class ImageMaker:
 
     def save_images(self, targetdir=None):
         """
-        Save the images and return the pattern able to retrieve them
+        Save the images and return the pattern to retrieve them
         """
         self.init_targetdir(targetdir)
         if not self.images:

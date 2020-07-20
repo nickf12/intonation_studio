@@ -7,6 +7,10 @@ import ffmpeg
 
 
 class VideoMaker:
+    """
+    Make video using Google speakers, audio analysts
+    and image makers
+    """
     TARGET_EXTENSION = '.mp4'
 
     @staticmethod
@@ -15,9 +19,22 @@ class VideoMaker:
         return metadata
 
     @classmethod
-    def from_text(cls, text, videopath=None, rate=0.4):
+    def from_text(
+        cls,
+        text,
+        language='en-US',
+        rate=0.4,
+        videopath=None
+    ):
+        """
+        Create a video from a text.
+        """
         speaker = GoogleSpeaker()
-        audio_filepath = speaker.speak(text, rate)
+        audio_filepath = speaker.speak(
+            text,
+            language=language,
+            rate=rate
+            )
         if not videopath:
             basename = os.path.splitext(os.path.basename(audio_filepath))[0]
             filename = f'{basename}{cls.TARGET_EXTENSION}'
@@ -32,7 +49,6 @@ class VideoMaker:
         }
         image = ffmpeg.input(pattern)
         audio = ffmpeg.input(audio_filepath)
-
         try:
             ffmpeg.output(image, audio, video_path, **outdict).run(
                 capture_stdout=True,
@@ -43,9 +59,10 @@ class VideoMaker:
             print('stdout:', e.stdout.decode('utf8'))
             print('stderr:', e.stderr.decode('utf8'))
             raise e
+        return None
 
     @staticmethod
-    def pitch_video_from_audio(filename, text=None):
+    def from_audio(filename, text=None):
         wav_file = path_in_medialib(filename)
         analyst = AudioAnalyst(wav_file, text)
         analysis = analyst.analyse()
@@ -67,3 +84,15 @@ class VideoMaker:
             print('stdout:', e.stdout.decode('utf8'))
             print('stderr:', e.stderr.decode('utf8'))
             raise e
+
+
+
+class VideoUploader:
+    """
+    Upload videos made by video makers
+    """
+
+    @staticmethod
+    def upload_from_list(json_file):
+        with open(json_file, 'r') as outfile:
+            json.dump(data, outfile)

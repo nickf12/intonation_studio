@@ -14,14 +14,11 @@ from utils import path_in_medialib, NoteTools
 class GoogleSpeaker:
     FILENAME_MAX_CHARS = 40
     FILENAME_EXTENSION = 'mp3'
-    DEFAULT_LANGUAGE_CODE = 'en-US'
     DEFAULT_CREDENTIAL_FILEPATH = \
         "/Users/elio/projects/writersup/credentials.json"
     default_credentials = None
 
-    def __init__(self, language_code=None):
-        self.language_code = language_code \
-            if language_code else self.DEFAULT_LANGUAGE_CODE
+    def __init__(self):
         credential_filepath = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
         if not credential_filepath or not os.path.exists(credential_filepath):
             self.default_credentials = \
@@ -49,17 +46,26 @@ class GoogleSpeaker:
             print('stderr:', e.stderr.decode('utf8'))
             raise e
 
-    def filename_from_text(self, text, speak_rate):
+    def filename_from_text(self, text, language_code, speak_rate):
         out = text.replace(" ", "_").lower()
         out = out[:self.FILENAME_MAX_CHARS] \
             if self.FILENAME_MAX_CHARS < len(out) else out
-        out = f"{out}_{self.language_code}_{str(speak_rate).replace('.','_')}"
+        out = f"{out}_{language_code}_{str(speak_rate).replace('.','_')}"
         return out
 
-    def speak(self, text, speak_rate=0.8, filename=None):
-        # Instantiates a client
+    def speak(
+        self,
+        text,
+        rate=0.8,
+        language='en-US',
+        filename=None,
+        voice_name='en-US-Wavenet-D'
+    ):
+        """
+        Create the audio file from text.
+        """
         if not filename:
-            filename = self.filename_from_text(text, speak_rate)
+            filename = self.filename_from_text(text, rate, language)
         filepath = path_in_medialib(filename)
         filepath_wav = f'{filepath}.wav'
         filepath_mp3 = f'{filepath}.mp3'
@@ -67,13 +73,13 @@ class GoogleSpeaker:
             return filepath_wav
         synthesis_input = texttospeech.SynthesisInput(text=text)
         voice = texttospeech.VoiceSelectionParams(
-            language_code=self.language_code,
-            name='en-US-Wavenet-D'
+            language_code=language,
+            name=voice_name
         )
         # Select the type of audio file you want returned
         audio_config = texttospeech.AudioConfig(
             audio_encoding=texttospeech.AudioEncoding.MP3,
-            speaking_rate=speak_rate
+            speaking_rate=rate
         )
         # voice parameters and audio file type
         response = self.client.synthesize_speech(
@@ -141,6 +147,9 @@ class AudioAnalyst:
             json.dump(self.analysis, json_file)
 
     def cluster(self):
+        """
+        Create clusters using hierarchical clustering
+        """
         zeros = np.zeros(len(self.samples))
         points = np.column_stack(
             (zeros.astype(np.double), self.samples.astype(np.double))
@@ -150,7 +159,7 @@ class AudioAnalyst:
 
     def set_analysis(self, samples):
         """
-        Compute statics one the samples vector has been created
+        Set samples and compute stats
         """
         self.samples = samples
         self.max_x = self.samples.size

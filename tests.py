@@ -4,10 +4,12 @@ import os.path
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram
 
+from models import YoutubeVideo
 from image import ImageMaker
 from utils import path_in_medialib
 from audio import GoogleSpeaker, AudioAnalyst
 from video import VideoMaker
+from upload import upload_file
 
 TEST_SENTENCE = 'Intonation Studio'
 JSON_FILE = 'test1.json'
@@ -108,10 +110,30 @@ class TestVideoMaker(unittest.TestCase):
 
     def test_from_text(self):
         """
-        Temporary entry point of the software
+        Create a video
         """
         videopath = VideoMaker.from_text(TEST_SENTENCE)
         self.assertTrue(os.path.exists(videopath))
+
+
+class TestVideoUploader(unittest.TestCase):
+
+    def test_upload_success(self):
+        """
+        Test multiple upload
+        """
+        video_path_1 = path_in_medialib('what_are_you_up_to?_0.4_en-US.mp4')
+        video_path_2 = path_in_medialib('how_are_you_doing?_0.4_en-US.mp4')
+        video1 = YoutubeVideo(
+            title='What are you up to. Pronunciation and Intonation',
+            file=video_path_1,
+        )
+        video2 = YoutubeVideo(
+            title='How are you doing. Pronunciation and Intonation',
+            file=video_path_2,
+        )
+        upload_file(video1)
+        upload_file(video2)
 
 
 if __name__ == '__main__':
