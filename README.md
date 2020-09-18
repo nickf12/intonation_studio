@@ -5,7 +5,7 @@ Currently in Proof of Concept. The project is looking for collaborators.
 
 Google Text-to-speech -> Audio Analysis -> Image/Video Maker -> Youtube
 
-Feel free to jam in!
+Feel free to jam in! I'm in NM.
 
 # Requirements
 
